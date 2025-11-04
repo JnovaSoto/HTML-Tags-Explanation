@@ -1,8 +1,12 @@
 body{
-    background-color: rgb(255, 255, 255);
+    background-color: rgb(250, 237, 237);
+}
+h1{
+    color: white;
 }
 /*Stles for table and his childrens*/
 table {
+    background-color: rgb(255, 255, 255);
     table-layout:fixed ;
     margin: 10px auto;
     border-collapse: collapse;
