@@ -1,17 +1,15 @@
-  
- async function getTags() {
+export async function init() {
+  console.log('🏠 Home script ejecutado');
 
-  const response = await fetch('/tags');
-  if (!response.ok) throw new Error('Error al obtener los tags');
+  async function getTags() {
+    const response = await fetch('/tags');
+    if (!response.ok) throw new Error('Error al obtener los tags');
+    return await response.json();
+  }
 
-  const data =  await response.json();
-
-  return data;
-}
-window.onload = async function () {
   try {
     const tags = await getTags();
-    console.log(tags);
+    console.log('✅ Tags cargados:', tags);
 
     const table = document.querySelector(".tagTable");
 
@@ -26,10 +24,10 @@ window.onload = async function () {
 
       row.innerHTML = `
         <td>${tag.tagName}</td>
-        <td>This section of an HTML document supplies metadata about the document itself</td>
+        <td>${tag.usability}</td>
         <td>
           <button>
-            Tags inside <strong>${tag.tagName}</strong>
+            <strong>Tags inside</strong>
             <span class="material-symbols-outlined arrow">arrow_drop_down</span>
           </button>
         </td>
@@ -39,6 +37,6 @@ window.onload = async function () {
     });
 
   } catch (error) {
-    console.error('❌ Error:', error.message);
+    console.error('❌ Error cargando tags:', error.message);
   }
-};
+}
