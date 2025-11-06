@@ -2,15 +2,19 @@ import sqlite3 from 'sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+//When using modules, it is essential to manually create global variables.
+const __filename = fileURLToPath(import.meta.url);//Full path of the current file
+const __dirname = path.dirname(__filename);//Path of the folder containing the current file
 
+//Using the current directory, access the SQLite database and attempt to connect to it.
 const dbPath = path.resolve(__dirname, '../database.sqlite');
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) console.error('Error al conectar SQLite:', err.message);
   else console.log('Conectado a SQLite');
 });
 
+//Use serialize to ensure it's the first command executed.
+//If the database doesn't exist, create it; if it already exists, ignore this command.
 db.serialize(() => {
   db.run(`
     CREATE TABLE IF NOT EXISTS tags (
@@ -21,5 +25,5 @@ db.serialize(() => {
     )
   `);
 });
-
+//Export the database connection for use in another file
 export default db;

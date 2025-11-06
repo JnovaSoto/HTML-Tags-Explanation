@@ -1,4 +1,4 @@
-
+//Exported function to be excecuted in the navigation file 
 export function init() {
     console.log('Create script ejecutado');
     const tagName = document.getElementById("")
