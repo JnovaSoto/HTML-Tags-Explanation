@@ -1,39 +1,46 @@
-📘 SPA HTML Tags Explanation
+# 📘 SPA HTML Tags Explanation
 
-HTML Tags Explanation is a modern web application designed to provide clear and interactive information about HTML tags—their usage, styles, and child elements. This Single Page Application (SPA) makes learning HTML practical, visual, and engaging.
+**HTML Tags Explanation** is a modern web application designed to provide clear and interactive information about HTML tags—their usage, styles, and child elements. This Single Page Application (SPA) makes learning HTML **practical, visual, and engaging**.
 
-🧩 Technologies Used
+---
 
-Frontend:
+## 🧩 Technologies Used
 
-HTML5
+### Frontend
+- HTML5  
+- CSS3  
+- JavaScript  
+- Bootstrap 5  
 
-CSS3
+### Backend
+- Node.js  
+- Express.js  
+- EJS (Embedded JavaScript templates)  
 
-JavaScript
+### Database
+- SQLite3  
 
-Bootstrap 5
+---
 
-Backend:
+## ✨ Features
+- Interactive and dynamic SPA experience  
+- Clear explanations for each HTML tag  
+- Create, view, and delete tags dynamically  
+- Responsive layout powered by Bootstrap  
+- Alerts and notifications for user actions  
 
-Node.js
+---
 
-Express.js
+## 🚀 Installation
+```bash
+# Clone the repository
+git clone https://github.com/your-username/html-tags-explanation.git
 
-EJS (Embedded JavaScript templates)
+# Navigate into the project directory
+cd html-tags-explanation
 
-Database:
+# Install dependencies
+npm install
 
-SQLite3
-
-✨ Features
-
-Interactive and dynamic SPA experience
-
-Clear explanations for each HTML tag
-
-Create, view, and delete tags dynamically
-
-Responsive layout powered by Bootstrap
-
-Alerts and notifications for user actions
+# Start the server
+npm start
