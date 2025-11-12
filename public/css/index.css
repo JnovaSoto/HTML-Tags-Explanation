@@ -1,7 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Stack+Sans+Notch:wght@200..700&display=swap');
 body{
     background-color: rgb(250, 237, 237);
+    font-family: "Stack Sans Notch", sans-serif;
 }
-h1{
+h3{
+    padding: 5px;
     color: white;
 }
 /*Stles for table and his childrens*/
@@ -13,14 +16,19 @@ table {
     width: 80%;
 }
 th,td {
-  padding: 0.6em;
+  padding: 20px;
+  border: 1px solid black;
 }
 tr{
     border: 2px solid #cca31e;
+    padding: 10px;
+    text-align: center;
 }
 tr:first-child{
+
+    border: 5px solid rgb(44, 43, 32);
     background-color: #cca31e;
-    border-collapse: collapse;
+  
 }
 .tagTable{
     border: 5px solid black;
@@ -28,6 +36,19 @@ tr:first-child{
 .tagTable th{
     padding: 10px;
 }
+.attribute-table tr{
+    border: none;
+    background-color:aliceblue;
+}
+.attribute-table tr td:nth-child(1){
+    background-color: rgb(236, 225, 163);
+    font-weight: bold;
+}
+.attribute-table tr td:nth-child(3){
+    background-color: lightgreen;
+    font-weight: bold;
+}
+
 /*Styles for the Unique content button*/
 button{
     background-color: #cca31e;
@@ -54,6 +75,7 @@ button:hover .arrow{
 .invisibleTr{
     display: none;
 }
+/*Delete button*/
 .delete{
     background-color: rgb(249, 130, 130);
 }
@@ -63,15 +85,17 @@ button:hover .arrow{
 .icon_delete{
     color: white;
 }
+/*Attributes box*/
 .dropdown {
   position: relative;
 }
 .dropdown-content {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.3s ease, opacity 0.3s ease;
+  transition: max-height 0.5s ease, opacity 0.s ease;
   opacity: 0;
 }
+/*Just if have the attribute then use the style*/
 .dropdown-row[style*="display: table-row"] .dropdown-content {
   max-height: 500px; 
   opacity: 1;

@@ -35,6 +35,17 @@ export async function init() {
     table.innerHTML = "";
     table.appendChild(header);
 
+    //Avoid using labels and it will be displayed literally as text.
+    function escapeHTML(str) {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+
     // We generate the rows dynamically
     tags.forEach(tag => {
       // Main row
@@ -44,8 +55,8 @@ export async function init() {
       const tagAttributes = attributes.filter(att => att.tag === tag.id);
 
       row.innerHTML = `
-        <td>${tag.tagName}</td>
-        <td>${tag.usability}</td>
+        <td><strong>${escapeHTML(tag.tagName)}</strong></td>
+        <td>${escapeHTML(tag.usability)}</td>
         <td>
           <button class="dropdown-btn">
             <strong>Tags inside</strong>
@@ -59,22 +70,27 @@ export async function init() {
         </td>
       `;
 
-      const dropdownRow = document.createElement('th');
+      const dropdownRow = document.createElement('tr');
       dropdownRow.classList.add('dropdown-row');
       dropdownRow.style.display = 'none'; // hidden initially
-      dropdownRow.innerHTML = `
-        <td colspan="4">
-          <div class="dropdown-content">`;
 
-      tagAttributes.forEach(att =>{
-        dropdownRow.innerHTML += `
-            <p>${att.attribute} -> ${att.info}</p>
-        `
-      })
-      dropdownRow.innerHTML += `
-          </div>
-        </td>
-      `;
+      // Use a single td that spans all columns
+      let html = `<td colspan="4" class="dropdown-content"><table class ="attribute-table">`;
+
+      // Build inner rows for each attribute
+      tagAttributes.forEach(att => {
+        html += `
+          <tr>
+            <td>Attribute</td>
+            <td>${att.attribute}</td>
+            <td>Information</td>
+            <td>${att.info}</td>
+          </tr>
+        `;
+      });
+
+      html += `</table></td>`;
+      dropdownRow.innerHTML = html;
 
 
       // Append both rows to the table
