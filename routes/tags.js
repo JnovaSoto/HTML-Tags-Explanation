@@ -1,33 +1,7 @@
 import express from 'express';
 import db from '../db/database.js';
-
+import { isAuthenticated } from '../middleware/auth.js';
 const router = express.Router();
-
-
-// Create user
-router.post('/user', (req, res) => {
-  const { username , email , password , admin } = req.body;
-
-  console.log(
-  'Inserting user:', 
-  username, 
-  email, 
-  admin ? "Administrador" : "Usuario"
-);
-
-
-  if (username == null || email == null || admin == null || password == null) {
-  return res.status(400).json({ error: 'All the attributes must be complete' });
-}
-
-  // SQL to insert a single tag
-  const sql = `INSERT INTO users (username, email, password, admin) VALUES (?, ?, ?, ?)`;
-
-  db.run(sql, [username,email,password,admin], function (err) {
-    if (err) return res.status(500).json({ error: err.message });
-    res.status(201).json({ id: this.lastID, username, email });
-  });
-});
 
 // Create tag
 router.post('/', (req, res) => {
@@ -102,27 +76,8 @@ router.get('/attributes', (req, res) => {
   });
 });
 
-// Get user
-router.get('/users/:id', (req, res) => {
-
-  const id =  parseInt(req.params.id, 10);
-
-    console.log("Getting the user with the id = " + id)
-
-  if (isNaN(id)) return res.status(400).json({ error: 'Invalid user ID' });
-
-  // SQL to get all attributes
-  const sql = `SELECT * FROM users WHERE ID = ?`;
-  db.get(sql, [id], (err, row) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (!row) return res.status(404).json({ error: 'User not found' });
-    res.json(row);
-  });
-
-});
-
 // Delete tag
-router.delete('/:id', (req, res) => {
+router.delete('/:id', isAuthenticated,(req, res) => {
   const id = req.params.id;
 
   // SQL to delete a single tag

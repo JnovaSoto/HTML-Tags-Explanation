@@ -2,6 +2,9 @@ import express from 'express';
 import expressLayouts from 'express-ejs-layouts';
 import partialsRouter from './routes/partials.js';
 import tagsRoutes from './routes/tags.js';
+import usersRoutes from './routes/users.js';
+import session from 'express-session';
+import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -14,14 +17,27 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Middleware 
+dotenv.config();
 app.use(express.json()); // Allow manage JSON in petitions
 app.use('/partials', partialsRouter); // Customize paths for inyect the partials
 app.use('/tags', tagsRoutes); // Customize paths in /tags
+app.use('/users', usersRoutes); // Customize paths in /tags
 app.use(express.static(path.join(__dirname, 'public'))); // Statistical files
+app.use(expressLayouts); //Layout for EJS view
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'supersecretkey',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 1000 * 60 * 30 // 30 minutes
+  }
+}));
+
 
 
 // EJS view engine configuration
-app.use(expressLayouts);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
@@ -29,14 +45,19 @@ app.set('views', path.join(__dirname, 'views'));
 app.get(['/', '/home'], (req, res) => {
   res.render('home', { layout: 'layout', title: 'Home'});
 });
-
+//Create
 app.get('/create', (req, res) => {
   res.render('create', { layout: 'layout', title: 'Create' });
 });
-
+//Sign up
 app.get('/signUp', (req, res) => {
   res.render('signUp', { layout: 'layout', title: 'SignUp' });
 });
+//Log In
+app.get('/logIn', (req, res) => {
+  res.render('logIn', { layout: 'layout', title: 'LogIn' });
+});
+
 
 
 // Start the Server

@@ -1,5 +1,5 @@
 //This function is only used to control the behavior of alerts.
-export function showTemporaryAlert(id) {
+export function showTemporaryAlert(id,text) {
 
   //Depends of the context you need the correct or the bad one
   const alert = document.getElementById(id);
@@ -7,6 +7,8 @@ export function showTemporaryAlert(id) {
 
   //Makes the alert to appear
   alert.style.display = 'block';
+  
+  if(text) alert.textContent = text;
   
   // Allow browser to register the initial position
   setTimeout(() => {

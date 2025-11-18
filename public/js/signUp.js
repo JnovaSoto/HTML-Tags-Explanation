@@ -1,48 +1,97 @@
 import { showTemporaryAlert } from './alerts.js';
+
 export async function init() {
 
-  console.log('Log In script executed');
+  console.log('SignUp script executed');
 
   // -------------------------------
-  // Handle login button clicks
+  // Select form and handle submit
   // -------------------------------
-
   const form = document.getElementById('signUp-form');
 
-  form.addEventListener('submit', async (e) => {
+  form.addEventListener('submit', async (event) => {
 
-     // Stop page reload
+    // Prevent page reload
     event.preventDefault();
 
-    // Take the attributes of the user from the form
-    const username = document.getElementById("user-input").value
-    const email = document.getElementById("email-input").value
-        const password = document.getElementById("pasword-input").value
+    // -------------------------------
+    // Get user input values
+    // -------------------------------
+    const usernameInput = document.getElementById("user-input");
+    const emailInput = document.getElementById("email-input");
+    const passwordInput = document.getElementById("pasword-input");
+    const passwordRepeatInput = document.getElementById("repeat-pasword-input");
 
-    const tagBody = {username,password,email,admin:0}
+    const username = usernameInput.value;
+    const email = emailInput.value;
+    const password = passwordInput.value;
+    const passwordRepeat = passwordRepeatInput.value;
 
-     try {
-      // -------------------------------
-      // Create the user 
-      // -------------------------------
-      const tagResponse = await fetch('/tags/user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(tagBody)
-      });
+    // -------------------------------
+    // Real-time validation
+    // -------------------------------
+    usernameInput.addEventListener("input", () => {
+      usernameInput.value = usernameInput.value.replace(/[^a-zA-Z0-9_]/g, '');
+    });
 
-      if (!tagResponse.ok) {
+    emailInput.addEventListener("input", () => {
+      const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!regex.test(emailInput.value)) {
+        emailInput.setCustomValidity("Invalid email format");
+      } else {
+        emailInput.setCustomValidity("");
+      }
+    });
+
+    // -------------------------------
+    // Check if passwords match
+    // -------------------------------
+    if (password === passwordRepeat) {
+
+      const tagBody = { username, password, email, admin: 0 };
+
+      try {
+        // -------------------------------
+        // Send request to create user
+        // -------------------------------
+        const tagResponse = await fetch('/users/user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(tagBody)
+        });
+
+        if (!tagResponse.ok) {
+          // -------------------------------
+          // Show alert if creation fails
+          // -------------------------------
+          showTemporaryAlert('alert');
+          console.error('Error creating user:', tagResponse.statusText);
+          return;
+        } else {
+          // -------------------------------
+          // User created successfully, clear inputs
+          // -------------------------------
+          console.log("User created successfully");
+          showTemporaryAlert('success');
+          usernameInput.value = "";
+          emailInput.value = "";
+          passwordInput.value = "";
+          passwordRepeatInput.value = "";
+        }
+
+      } catch (error) {
+        // -------------------------------
+        // Handle fetch/network errors
+        // -------------------------------
+        console.error('Fetch failed:', error);
         showTemporaryAlert('alert');
-        console.error('Error creating user:', tagResponse.statusText);
-        return;
-      }else{
-        console.log("User created successfully")
-        showTemporaryAlert('success');
       }
 
-    } catch (error) {
-      console.error('Fetch failed:', error);
-      showTemporaryAlert('alert');
+    } else {
+      // -------------------------------
+      // Passwords do not match
+      // -------------------------------
+      showTemporaryAlert('alert', "The passwords don't match");
     }
 
   });

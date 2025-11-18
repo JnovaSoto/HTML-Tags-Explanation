@@ -14,9 +14,12 @@
 - Core UI
 
 ### Backend
-- Node.js  
-- Express.js  
+- Node
+- Express  
 - EJS (Embedded JavaScript templates)  
+- Bcrypt
+- Validator
+- dotenv
 
 ### Database
 - SQLite3  
