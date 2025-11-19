@@ -18,22 +18,22 @@ const __dirname = path.dirname(__filename);
 
 // Middleware 
 dotenv.config();
+app.use(session({
+  secret: process.env.SESSION_SECRET,//Signed Cokkie 
+  resave: false,// Dont save the Session if nothing has changed
+  saveUninitialized: false, //Dont save a empty Session
+  cookie: {
+    httpOnly: true,//JavaScript is prohibited from reading it; only the server and the browser can read it.
+    secure: process.env.NODE_ENV === 'production',// The cookie is sent via http if the project is in the development phase.
+    maxAge: 1000 * 60 * 30 // 30 minutes is the session time before expired
+  }
+}));
 app.use(express.json()); // Allow manage JSON in petitions
 app.use('/partials', partialsRouter); // Customize paths for inyect the partials
 app.use('/tags', tagsRoutes); // Customize paths in /tags
 app.use('/users', usersRoutes); // Customize paths in /tags
 app.use(express.static(path.join(__dirname, 'public'))); // Statistical files
 app.use(expressLayouts); //Layout for EJS view
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'supersecretkey',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 1000 * 60 * 30 // 30 minutes
-  }
-}));
 
 
 

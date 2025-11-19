@@ -29,6 +29,7 @@ export async function init() {
       const tagResponse = await fetch('/users/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(tagBody)
       });
 
@@ -36,7 +37,7 @@ export async function init() {
         // -------------------------------
         // Show alert if login fails
         // -------------------------------
-        showTemporaryAlert('alert');
+        showTemporaryAlert('alert', "User or Password are incorrects");
         console.error('Error login user:', tagResponse.statusText);
         return;
       } else {
@@ -44,9 +45,12 @@ export async function init() {
         // Login successful, clear input fields
         // -------------------------------
         console.log("User logged in successfully")
-        showTemporaryAlert('success');
+        showTemporaryAlert('success', "Log In success");
         document.getElementById("login-input").value = "";
-        document.getElementById("email-input").value = "";
+        document.getElementById("pasword-input").value = "";
+
+        //Redirect
+        window.location.href = "/home";
       }
 
     } catch (error) {
@@ -54,7 +58,7 @@ export async function init() {
       // Handle fetch/network errors
       // -------------------------------
       console.error('Fetch failed:', error);
-      showTemporaryAlert('alert');
+      showTemporaryAlert('alert', "Something went wrong");
     }
 
   });

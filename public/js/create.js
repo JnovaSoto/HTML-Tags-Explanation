@@ -68,8 +68,13 @@ export function init() {
       });
 
       if (!tagResponse.ok) {
-        showTemporaryAlert('alert');
-        console.error('Error creating tag:', tagResponse.statusText);
+        const errData = await res.json();
+
+        if (res.status === 403) {
+          showTemporaryAlert('alert', 'You do not have permission to create this tag');
+        } else {
+          showTemporaryAlert('alert', errData.error || 'Failed to create tag');
+        }
         return;
       }
 
@@ -88,8 +93,13 @@ export function init() {
       });
 
       if (!attrResponse.ok) {
-        showTemporaryAlert('alert');
-        console.error('Error creating attributes:', attrResponse.statusText);
+        const errData = await res.json();
+
+        if (res.status === 403) {
+          showTemporaryAlert('alert', 'You do not have permission to create this attribute');
+        } else {
+          showTemporaryAlert('alert', errData.error || 'Failed to create the attribute');
+        }
         return;
       }
 

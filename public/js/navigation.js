@@ -1,83 +1,18 @@
 // -------------------------------
-// Start the function when the DOM is loaded
+// navigation.js - SPA handler
 // -------------------------------
+
 document.addEventListener('DOMContentLoaded', async () => {
-  await loadFooterAndHeader(); 
-  startNavigation();
-  executeActualScript();
+  await loadHeaderAndFooter();
+  initNavigation();       // global SPA navigation buttons
+  executePageScript();    // page-specific scripts
+  handlePopState();       // handle back/forward
 });
 
 // -------------------------------
-// Navigation button handlers
+// Load header and footer once
 // -------------------------------
-function startNavigation() {
-
-  // Find the button that takes you to the Create Page
-  const btnCreate = document.getElementById('btn-go-create');
-  if (btnCreate) btnCreate.addEventListener('click', () => changePage('/create'));
-
-  // Find the button that takes you to the Home Page
-  const btnHome = document.getElementById('btn-go-home');
-  if (btnHome) btnHome.addEventListener('click', () => changePage('/home'));
-
-  // Find the button that takes you to the Sign Up Page
-  const btnSignUp = document.getElementById('btn-sign-up');
-  if (btnSignUp) btnSignUp.addEventListener('click', () => changePage('/signUp'));
-
-  // Find the button that takes you to the Log In Page
-  const btnLogIn = document.getElementById('btn-log-in');
-  if (btnLogIn) btnLogIn.addEventListener('click', () => changePage('/logIn'));
-}
-
-// -------------------------------
-// Page changer function
-// -------------------------------
-function changePage(path) {
-
-  // Push a state to the next path: State-Title-URL
-  history.pushState(null, null, path);
-
-  // Fetch the next path
-  fetch(path)
-    .then(res => res.text()) // Convert the response into text
-    .then(html => {
-      // Parse the text into a HTML Document
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-
-      // Replace the current content with the new content
-      const newContent = doc.querySelector('#app').innerHTML;
-      document.querySelector('#app').innerHTML = newContent;
-
-      // Reinitialize navigation and page-specific scripts
-      startNavigation();
-      executeActualScript();
-    })
-    .catch(console.error);
-}
-
-// -------------------------------
-// Execute the script belonging to the current page
-// -------------------------------
-function executeActualScript() {
-  const path = window.location.pathname;
-
-  if (path === '/' || path === '/home') {
-    import('/js/home.js').then(mod => mod.init && mod.init());
-    import('/js/delate.js').then(mod => mod.init && mod.init());
-  } else if (path === '/create') {
-    import('/js/create.js').then(mod => mod.init && mod.init());
-  } else if (path === '/signUp') {
-    import('/js/signUp.js').then(mod => mod.init && mod.init());
-  } else if (path === '/logIn') {
-    import('/js/logIn.js').then(mod => mod.init && mod.init());
-  }
-}
-
-// -------------------------------
-// Load header and footer if empty
-// -------------------------------
-async function loadFooterAndHeader() {
+async function loadHeaderAndFooter() {
   const header = document.querySelector('#header');
   const footer = document.querySelector('#footer');
 
@@ -86,6 +21,10 @@ async function loadFooterAndHeader() {
       const res = await fetch('/partials/header');
       const html = await res.text();
       header.innerHTML = html;
+
+      // Initialize header scripts AFTER insertion
+      import('/js/header.js').then(mod => mod.init && mod.init());
+
     } catch (err) {
       console.error('Error loading header:', err);
     }
@@ -103,6 +42,68 @@ async function loadFooterAndHeader() {
 }
 
 // -------------------------------
+// Global SPA navigation buttons
+// -------------------------------
+function initNavigation() {
+  // Event delegation: any click inside #app or header
+  document.body.addEventListener('click', e => {
+    if (e.target.matches('#btn-go-create')) changePage('/create');
+    if (e.target.matches('#btn-go-home')) changePage('/home');
+    if (e.target.matches('#btn-sign-up')) changePage('/signUp');
+    if (e.target.matches('#btn-log-in')) changePage('/logIn');
+    if(e.target.matches('#btn-go-profile')) changePage('/profile');
+  });
+}
+// -------------------------------
+// Change SPA page
+// -------------------------------
+function changePage(path) {
+  history.pushState(null, null, path);
+
+  fetch(path)
+    .then(res => res.text())
+    .then(html => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const newContent = doc.querySelector('#app').innerHTML;
+      document.querySelector('#app').innerHTML = newContent;
+
+      // Run page-specific scripts only
+      executePageScript();
+    })
+    .catch(console.error);
+}
+
+// -------------------------------
+// Page-specific script loader
+// -------------------------------
+function executePageScript() {
+  const path = window.location.pathname;
+
+  switch (path) {
+    case '/':
+    case '/home':
+      import('/js/home.js').then(mod => mod.init && mod.init());
+      import('/js/delate.js').then(mod => mod.init && mod.init());
+      break;
+    case '/create':
+      import('/js/create.js').then(mod => mod.init && mod.init());
+      break;
+    case '/signUp':
+      import('/js/signUp.js').then(mod => mod.init && mod.init());
+      break;
+    case '/logIn':
+      import('/js/logIn.js').then(mod => mod.init && mod.init());
+      break;
+    case '/profile':
+      import('/js/profile.js').then(mod => mod.init && mod.init());
+      break;
+  }
+}
+
+// -------------------------------
 // Handle browser back/forward buttons
 // -------------------------------
-window.addEventListener('popstate', () => changePage(location.pathname));
+function handlePopState() {
+  window.addEventListener('popstate', () => changePage(location.pathname));
+}

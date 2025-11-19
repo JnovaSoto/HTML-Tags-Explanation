@@ -20,27 +20,28 @@ export async function init() {
     // Confirm deletion
     if (!confirm('Are you sure you want to delete this tag?')) return;
 
-    try {
-      // -------------------------------
-      // Send DELETE request to backend
-      // -------------------------------
-      const res = await fetch(`/tags/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/tags/${id}`, { method: 'DELETE' });
 
-      if (res.ok) {
-        // ✅ Remove the row from the table
-        const row = deleteBtn.closest('tr');
-        if (row) row.remove();
+    if (res.ok) {
+      // Remove the row from the table
+      const row = deleteBtn.closest('tr');
+      if (row) row.remove();
 
-        showTemporaryAlert('success');
-        console.log(`Tag ${id} deleted successfully.`);
+      showTemporaryAlert('success', 'Tag deleted successfully');
+      console.log(`Tag ${id} deleted successfully.`);
+    } else {
+
+      const errData = await res.json();
+
+      if (res.status === 401) {
+        showTemporaryAlert('alert', 'You do not have permission to delete this tag');
+      } else if (res.status === 404) {
+        showTemporaryAlert('alert', 'Tag not found');
       } else {
-        showTemporaryAlert('alert');
-        console.error('Failed to delete tag.');
+        showTemporaryAlert('alert', errData.error || 'Failed to delete tag');
       }
 
-    } catch (err) {
-      showTemporaryAlert('alert');
-      console.error('Error deleting tag:', err);
+      console.error('Failed to delete tag:', errData);
     }
   });
 }

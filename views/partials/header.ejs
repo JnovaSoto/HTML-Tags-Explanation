@@ -21,10 +21,13 @@
       </div>
     </li>
     <li class="nav-item me-4">
-      <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Edit tags</a>
+      <a class="nav-link disabled" href="/edit" tabindex="-1" id="btn-edit-tags" aria-disabled="true">Edit tags</a>
+    </li>
+     <li class="nav-item me-4">
+      <a class="nav-link disabled" href="/create" tabindex="-1" id="btn-create-tags" aria-disabled="true">Create tags</a>
     </li>
   </ul>
-  <form class="d-flex search-form">
+  <form class="d-flex search-form" action="get" method="get" id="getTag" required>
     <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
     <button class="btn btn-outline-success" type="submit">Search</button>
   </form>

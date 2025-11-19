@@ -70,7 +70,7 @@ export async function init() {
           </button>
         </td>
         <td>
-          <button class="delete-btn delete" data-id="${tag.id}">
+          <button class="delete-btn delete" id="btn-delete-tags" data-id="${tag.id}">
             <span class="material-symbols-outlined icon_delete">delete</span>
           </button>
         </td>

@@ -45,4 +45,14 @@ footer {
 #btn-sign-up{
   cursor: pointer;
 }
+#btn-log-in{
+  cursor: pointer;
+}
+#btn-log-out{
+  cursor: pointer;
+}
+#btn-go-profile{
+  cursor: pointer;
+}
+
 

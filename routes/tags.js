@@ -1,16 +1,16 @@
 import express from 'express';
 import db from '../db/database.js';
 import { isAuthenticated } from '../middleware/auth.js';
+import { isAdminLevel1 } from '../middleware/auth.js';
 const router = express.Router();
 
 // Create tag
-router.post('/', (req, res) => {
+router.post('/',isAuthenticated, (req, res) => {
   const { tagName, usability } = req.body;
 
   console.log('Inserting tag:', tagName, usability);
 
-  if (!tagName) return res.status(400).json({ error: 'tagName is obligatory' });
-  if (!usability) return res.status(400).json({ error: 'usability is obligatory' });
+  if (!tagName || !usability) return res.status(400).json({ error: 'Missing fields' });
 
   // SQL to insert a single tag
   const sql = `INSERT INTO tags (tagName, usability) VALUES (?, ?)`;
@@ -22,7 +22,7 @@ router.post('/', (req, res) => {
 });
 
 // Create attributes (batch insert)
-router.post('/attributes', (req, res) => {
+router.post('/attributes',isAuthenticated, (req, res) => {
   const { tagId, attributes } = req.body;
 
    console.log(
@@ -63,6 +63,29 @@ router.get('/', (req, res) => {
   });
 });
 
+// Get tag by name
+router.get('/:name', isAuthenticated, (req, res) => {
+  const tagName = req.params.name;
+
+  console.log(`[GET /tags/${tagName}] Tag request received`);
+
+  const sql = `SELECT * FROM tags WHERE tagName = ?`;
+
+  db.all(sql, [tagName], (err, rows) => {
+    if (err) {
+      console.error('Database error:', err.message);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Tag not found' });
+    }
+
+    res.json(rows[0]);
+  });
+});
+
+
 // Get attributes
 router.get('/attributes', (req, res) => {
   // SQL to get all attributes
@@ -77,7 +100,7 @@ router.get('/attributes', (req, res) => {
 });
 
 // Delete tag
-router.delete('/:id', isAuthenticated,(req, res) => {
+router.delete('/:id', isAdminLevel1,(req, res) => {
   const id = req.params.id;
 
   // SQL to delete a single tag

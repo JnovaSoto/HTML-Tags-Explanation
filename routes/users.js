@@ -2,8 +2,7 @@ import express from 'express';
 import bcrypt from "bcrypt";
 import validator from "validator";
 import db from '../db/database.js';
-import { isAuthenticated } from '../middleware/auth.js';
-
+import { isAdminLevel1 } from '../middleware/auth.js';
 const router = express.Router();
 
 // -------------------------------
@@ -16,7 +15,6 @@ router.post('/user', async (req, res) => {
 
   // Hash password
   const hash = await bcrypt.hash(password, saltRounds);
-  console.log("Hash = " + hash);
 
   console.log('Inserting user:', username, email, admin ? "Admin" : "User");
 
@@ -49,7 +47,9 @@ router.post('/login', (req, res) => {
 
   // Find user by username OR email
   const sql = `SELECT * FROM users WHERE username = ? OR email = ?`;
+  
   db.get(sql, [login, login], async (err, user) => {
+    console.log('User from DB:', user);
     if (err) return res.status(500).json({ error: err.message });
     if (!user) return res.status(401).json({ error: 'User or password are incorrect' });
 
@@ -60,15 +60,37 @@ router.post('/login', (req, res) => {
     // Save session
     req.session.userId = user.id;
     req.session.username = user.username;
+    req.session.admin = user.admin;
 
     res.json({ message: 'Successfully Login', userId: user.id, username: user.username, admin: user.admin });
   });
 });
 
 // -------------------------------
+// Log Out
+// -------------------------------
+router.post('/logout', (req, res) => {
+
+  if (req.session) {
+    // Destroy session
+    req.session.destroy(err => {
+      if (err) {
+        console.error('Error destroying session:', err);
+        return res.status(500).json({ message: 'Could not log out' });
+      }
+      // Clear cookie 
+      res.clearCookie('connect.sid'); 
+      res.json({ message: 'Logged out successfully' });
+    });
+  } else {
+    res.status(200).json({ message: 'No active session' });
+  }
+});
+
+// -------------------------------
 // Get user by ID
 // -------------------------------
-router.get('/users/:id', (req, res) => {
+router.get('/users/:id',isAdminLevel1, (req, res) => {
   const id = parseInt(req.params.id, 10);
   console.log("Getting the user with the id = " + id);
 
@@ -80,6 +102,20 @@ router.get('/users/:id', (req, res) => {
     if (!row) return res.status(404).json({ error: 'User not found' });
     res.json(row);
   });
+});
+
+// -------------------------------
+// Logged?
+// -------------------------------
+router.get('/me', (req, res) => {
+
+  if (req.session.userId) {
+    console.log("Logged");
+    res.json({ loggedIn: true, username: req.session.username, admin: req.session.admin });
+  } else {
+    console.log("Not Logged");
+    res.json({ loggedIn: false });
+  }
 });
 
 export default router;
