@@ -86,7 +86,7 @@ export function init() {
       // Send all attributes linked to that tag
       // -------------------------------
       const attributesBody = { tagId, attributes };
-      const attrResponse = await fetch('/tags/attributes', {
+      const attrResponse = await fetch('/tags/attributes/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(attributesBody)

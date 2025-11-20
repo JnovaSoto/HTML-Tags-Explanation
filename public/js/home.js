@@ -14,7 +14,7 @@ export async function init() {
   }
 
   // Retrieve all attributes from the database
-  async function getAttributes() {
+  async function getAttributes() { 
     const response = await fetch('/tags/attributes');
     if (!response.ok) throw new Error('Error fetching attributes');
     return await response.json();

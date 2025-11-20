@@ -28,7 +28,7 @@
 
 ## ✨ Features
 - Interactive and dynamic SPA experience  
-- Clear explanations for each HTML tag  
+- Clear explanations for each HTML tag and its attributes
 - Create, view, and delete tags dynamically  
 - Responsive layout powered by Bootstrap  
 - Alerts and notifications for user actions  

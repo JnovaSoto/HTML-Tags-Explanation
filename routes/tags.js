@@ -4,8 +4,35 @@ import { isAuthenticated } from '../middleware/auth.js';
 import { isAdminLevel1 } from '../middleware/auth.js';
 const router = express.Router();
 
+// Get tags
+router.get('/', (req, res) => {
+  // SQL to get all tags
+  const sql = `SELECT * FROM tags`;
+
+  console.log("Getting the tags")
+
+  db.all(sql, [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+
+// Get attributes
+router.get('/attributes', (req, res) => {
+  // SQL to get all attributes
+  const sql = `SELECT * FROM attributes`;
+
+    console.log("Getting the attributes")
+
+  db.all(sql, [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
 // Create tag
-router.post('/',isAuthenticated, (req, res) => {
+router.post('/',isAuthenticated, (req, res) => { 
   const { tagName, usability } = req.body;
 
   console.log('Inserting tag:', tagName, usability);
@@ -22,7 +49,7 @@ router.post('/',isAuthenticated, (req, res) => {
 });
 
 // Create attributes (batch insert)
-router.post('/attributes',isAuthenticated, (req, res) => {
+router.post('/attributes/create',isAuthenticated, (req, res) => {
   const { tagId, attributes } = req.body;
 
    console.log(
@@ -50,19 +77,6 @@ router.post('/attributes',isAuthenticated, (req, res) => {
   });
 });
 
-// Get tags
-router.get('/', (req, res) => {
-  // SQL to get all tags
-  const sql = `SELECT * FROM tags`;
-
-  console.log("Getting the tags")
-
-  db.all(sql, [], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(rows);
-  });
-});
-
 // Get tag by name
 router.get('/:name', isAuthenticated, (req, res) => {
   const tagName = req.params.name;
@@ -85,20 +99,6 @@ router.get('/:name', isAuthenticated, (req, res) => {
   });
 });
 
-
-// Get attributes
-router.get('/attributes', (req, res) => {
-  // SQL to get all attributes
-  const sql = `SELECT * FROM attributes`;
-
-    console.log("Getting the attributes")
-
-  db.all(sql, [], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(rows);
-  });
-});
-
 // Delete tag
 router.delete('/:id', isAdminLevel1,(req, res) => {
   const id = req.params.id;
@@ -118,5 +118,6 @@ router.delete('/:id', isAdminLevel1,(req, res) => {
     res.json({ message: 'Tag deleted', deletedId: id });
   });
 });
+
 
 export default router;

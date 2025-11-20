@@ -1,12 +1,12 @@
 // Middleware to check if user is logged in
 export function isAuthenticated(req, res, next) { 
   if (req.session.userId) return next();
-  res.status(401).json({ message: 'No autorizado' });
+  res.status(401).json({ message: 'Unauthorized' });
 }
 
 export function isAdminLevel1(req, res, next) {
   if (!req.session.userId) {
-    return res.status(401).json({ error: 'Unauthorized' });
+    return res.status(401).json({ error: 'Unauthorized admin level 0' });
   }
 
   // Assuming you store the admin level in the session
