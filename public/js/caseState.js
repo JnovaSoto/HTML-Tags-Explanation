@@ -1,3 +1,4 @@
+import {showTemporaryAlert} from './alerts.js';
 export async function cases(res) {
     if (!res.ok) {
         switch (res.status) {
@@ -8,8 +9,7 @@ export async function cases(res) {
                 showTemporaryAlert('alert', 'No data found');
                 break;
             default:
-                const errData = await res.json();
-                showTemporaryAlert('alert', errData.error || 'Failed to fetch');
+                showTemporaryAlert('alert', 'Failed to fetch');
         }
         return false;
     }

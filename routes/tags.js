@@ -98,7 +98,7 @@ router.get('/idTag/:id', isAuthenticated, (req,res) =>{
 })
 
 // Get tag by name
-router.get('/:name', isAuthenticated, (req, res) => {
+router.get('/tagName/:name', isAuthenticated, (req, res) => {
   const tagName = req.params.name;
 
   console.log("Getting a tag by name");
@@ -142,7 +142,7 @@ router.get('/attribute/:id', isAuthenticated, (req, res) => {
 });
 
 // Get attribute by name
-router.get('/attribute/:name', isAuthenticated, (req, res) => {
+router.get('/attribute/attributeName/:name', isAuthenticated, (req, res) => {
   const name = req.params.name;
 
   console.log("Getting attribute by name", name);

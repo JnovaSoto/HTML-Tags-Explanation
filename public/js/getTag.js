@@ -1,7 +1,7 @@
 import { showTemporaryAlert } from './alerts.js';
 import { generateTable } from './generateTable.js';
 import { dropdown } from './dropdownAtt.js';
-import { cases } from './caseState.js'
+import { cases } from './caseState.js';
 
 export async function init() {
   console.log('🧤 GetTag script executed');
@@ -22,7 +22,7 @@ export async function init() {
 
     try {
       // -------------------------------
-      // Verificar sesión
+      // Verify session
       // -------------------------------
       const resSession = await fetch('/users/me');
       const sessionData = await resSession.json();
@@ -31,80 +31,94 @@ export async function init() {
         return;
       }
 
-      // Fetch tag by name
+      // Fetch tag(s) by name
       const resTag = await fetch(`/tags/${encodeURIComponent(tagName)}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
 
       if (await cases(resTag)) {
-const response = await fetch('/tags/attributes');
-if (!response.ok) throw new Error('Error fetching attributes');
+        // Load tags and attributes
+        const tags = await resTag.json();
 
-const tags = await resTag.json();
-const attributes = await response.json();
+        const resAttrs = await fetch('/tags/attributes');
+        if (!resAttrs.ok) throw new Error('Error fetching attributes');
+        const attributes = await resAttrs.json();
 
-console.log('Tag fetched successfully:', tags);
-console.log('✅ Attributes loaded:', attributes);
+        console.log('Tag fetched successfully:', tags);
+        console.log('✅ Attributes loaded:', attributes);
 
-const table = document.querySelector(".tagTable");
-const header = table.querySelector("tr");
-table.innerHTML = '';
-table.appendChild(header);
+        const table = document.querySelector(".tagTable");
+        const header = table.querySelector("tr");
+        table.innerHTML = '';
+        if (header) table.appendChild(header);
 
-// Por cada tag
-tags.forEach(tag => {
-    const row = document.createElement("tr");
-    const dropdownRow = document.createElement("tr");
-    dropdownRow.classList.add('dropdown-row');
-    dropdownRow.style.display = 'none';
+        // For each tag found, create rows and filter attributes by tag id
+        tags.forEach(tag => {
+          const row = document.createElement("tr");
+          const dropdownRow = document.createElement("tr");
+          dropdownRow.classList.add('dropdown-row');
+          dropdownRow.style.display = 'none';
 
-    // Por cada atributo de este tag
-    attributes.forEach(att => {
-        if (att.tag === tag.id) {
-            // Puedes procesar el atributo aquí si hace falta
-            // Por ejemplo, agregar celdas a row
-        }
-    });
+          // Robust filter: coerce to Number to avoid type mismatch
+          const tagAttrs = attributes.filter(att => Number(att.tag) === Number(tag.id));
 
-    const filledRows = generateTable(tag, attributes.filter(att => att.tag === tag.id), row, dropdownRow);
-    table.appendChild(filledRows.row);
-    table.appendChild(filledRows.dropdownRow);
-});
+          const filledRows = generateTable(tag, tagAttrs, row, dropdownRow);
+          table.appendChild(filledRows.row);
+          table.appendChild(filledRows.dropdownRow);
+        });
 
-
+        // Use centralized dropdown binding (idempotent)
         dropdown(table);
-
-      } else {
-
-        // Fetch attribute by name
-        const resAtt = await fetch(`/tags/${encodeURIComponent(tagName)}`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-        });
-
-        if (await cases(resAtt)) console.log('Attribute fetched successfully:', await resAtt.json());
-
-        // Fetch tag by id
-        const tag = await fetch(`/tags/idTag/${encodeURIComponent(resAtt)}`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-        });
-
-         if (await cases(resAtt)) console.log('Tag fetched successfully:', await resAtt.json());
-
-         //Per Attribute Name
-
-
-
-
-
-
-
-        
+        showTemporaryAlert('success', 'Tags retrieved successfully');
+        return;
       }
 
-      
+      // If not found by name, search by attribute name (fallback)
+      const resAttr = await fetch(`/tags/attribute/attributeName/${encodeURIComponent(tagName)}`);
+      if (!(await cases(resAttr))) return;
+
+      const attData = await resAttr.json();
+      const attributesFound = Array.isArray(attData) ? attData : [attData];
+      if (attributesFound.length === 0) {
+        showTemporaryAlert('alert', 'No attributes found by that name');
+        return;
+      }
+
+      // Take the first attribute and fetch its tag by id
+      const firstAttr = attributesFound[0];
+      const tagIdFromAttr = Number(firstAttr.tag);
+      if (Number.isNaN(tagIdFromAttr)) {
+        showTemporaryAlert('alert', 'Invalid attribute->tag association');
+        return;
+      }
+
+      const resTagById = await fetch(`/tags/idTag/${encodeURIComponent(tagIdFromAttr)}`);
+      if (!(await cases(resTagById))) return;
+
+      const tagById = await resTagById.json();
+      const tagsArray = Array.isArray(tagById) ? tagById : [tagById];
+
+      const table = document.querySelector(".tagTable");
+      const header = table.querySelector("tr");
+      table.innerHTML = '';
+      if (header) table.appendChild(header);
+
+      tagsArray.forEach(t => {
+        const row = document.createElement("tr");
+        const dropdownRow = document.createElement("tr");
+        dropdownRow.classList.add('dropdown-row');
+        dropdownRow.style.display = 'none';
+
+        const tagAttrs = attributesFound.filter(att => Number(att.tag) === Number(t.id));
+
+        const filled = generateTable(t, tagAttrs, row, dropdownRow);
+        table.appendChild(filled.row);
+        table.appendChild(filled.dropdownRow);
+      });
+
+      dropdown(table);
+      showTemporaryAlert('success', 'Tag(s) and attribute(s) found');
 
     } catch (err) {
       console.error('Error fetching tag:', err);
