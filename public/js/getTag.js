@@ -10,6 +10,8 @@ export async function init() {
   if (!formGetTag) return;
 
   formGetTag.addEventListener('submit', async (event) => {
+
+    // Prevent default form submission
     event.preventDefault();
 
     const input = formGetTag.querySelector('input[type="search"]');
@@ -18,6 +20,7 @@ export async function init() {
       return;
     }
 
+    // Get the tag name from input
     const tagName = input.value.trim();
 
     try {
@@ -31,95 +34,104 @@ export async function init() {
         return;
       }
 
+      const table = document.querySelector('.tagTable');
+      // Clear previous results
+      table.innerHTML = `
+        <tr>
+          <th>Tag</th>
+          <th>Usability</th>
+          <th>Actions</th>
+          <th>Delete</th>
+        </tr>
+      `;
+
       // Fetch tag(s) by name
-      const resTag = await fetch(`/tags/${encodeURIComponent(tagName)}`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      });
-
+      const resTag = await fetch(`/tags/tagName/${encodeURIComponent(tagName)}`);
       if (await cases(resTag)) {
+
         // Load tags and attributes
-        const tags = await resTag.json();
+        const rawTag = await resTag.json();
+        // Ensure tags is always an array
+        const tags = Array.isArray(rawTag) ? rawTag : [rawTag];
 
-        const resAttrs = await fetch('/tags/attributes');
-        if (!resAttrs.ok) throw new Error('Error fetching attributes');
-        const attributes = await resAttrs.json();
-
-        console.log('Tag fetched successfully:', tags);
-        console.log('✅ Attributes loaded:', attributes);
-
-        const table = document.querySelector(".tagTable");
-        const header = table.querySelector("tr");
-        table.innerHTML = '';
-        if (header) table.appendChild(header);
+        const resAttrAll = await fetch('/tags/attributes');
+        if (!resAttrAll.ok) throw new Error('Error fetching attributes list');
+        const allAttributes = await resAttrAll.json();
 
         // For each tag found, create rows and filter attributes by tag id
-        tags.forEach(tag => {
-          const row = document.createElement("tr");
-          const dropdownRow = document.createElement("tr");
+        for (const t of tags) {
+          const tagId = Number(t.id);
+          // Robust filter: coerce to Number to avoid type mismatch
+          const tagAttrs = allAttributes.filter(att => Number(att.tag) === tagId);
+          console.log(`Attributes for tag id=${tagId}:`, tagAttrs);
+
+          const row = document.createElement('tr');
+          const dropdownRow = document.createElement('tr');
           dropdownRow.classList.add('dropdown-row');
           dropdownRow.style.display = 'none';
 
-          // Robust filter: coerce to Number to avoid type mismatch
-          const tagAttrs = attributes.filter(att => Number(att.tag) === Number(tag.id));
+          const filled = generateTable(t, tagAttrs, row, dropdownRow);
+          table.appendChild(filled.row);
+          table.appendChild(filled.dropdownRow);
+        }
 
-          const filledRows = generateTable(tag, tagAttrs, row, dropdownRow);
-          table.appendChild(filledRows.row);
-          table.appendChild(filledRows.dropdownRow);
-        });
-
-        // Use centralized dropdown binding (idempotent)
-        dropdown(table);
         showTemporaryAlert('success', 'Tags retrieved successfully');
         return;
+      }else {
+
+        showTemporaryAlert('alert', 'No tags found with that name');
+
+         // If not found by name, search by attribute name (fallback)
+        const resAttr = await fetch(`/tags/attribute/attributeName/${encodeURIComponent(tagName)}`);
+        if (!(await cases(resAttr))) return;
+
+          const attData = await resAttr.json();
+          const attributesFound = Array.isArray(attData) ? attData : [attData];
+
+          if (attributesFound.length === 0) {
+            showTemporaryAlert('alert', 'No attributes found by that name');
+            return;
+          }
+
+          // Take the first attribute and fetch its tag by id
+          const firstAttr = attributesFound[0];
+          const tagIdFromAttr = Number(firstAttr.tag);
+
+          if (Number.isNaN(tagIdFromAttr)) {
+            showTemporaryAlert('alert', 'Invalid attribute->tag association');
+            return;
+          }
+
+          const resTagById = await fetch(`/tags/idTag/${encodeURIComponent(tagIdFromAttr)}`);
+          
+          if (!(await cases(resTagById))) return;
+
+          const tagById = await resTagById.json();
+          const tagsArray = Array.isArray(tagById) ? tagById : [tagById];
+
+          const table = document.querySelector(".tagTable");
+          const header = table.querySelector("tr");
+          table.innerHTML = '';
+
+          if (header) table.appendChild(header);
+
+            tagsArray.forEach(t => {
+              const row = document.createElement("tr");
+              const dropdownRow = document.createElement("tr");
+              dropdownRow.classList.add('dropdown-row');
+              dropdownRow.style.display = 'none';
+
+              const tagAttrs = attributesFound.filter(att => Number(att.tag) === Number(t.id));
+
+              const filled = generateTable(t, tagAttrs, row, dropdownRow);
+              table.appendChild(filled.row);
+              table.appendChild(filled.dropdownRow);
+          });
+
+        dropdown(table);
+        showTemporaryAlert('success', 'Tag(s) and attribute(s) found');
       }
-
-      // If not found by name, search by attribute name (fallback)
-      const resAttr = await fetch(`/tags/attribute/attributeName/${encodeURIComponent(tagName)}`);
-      if (!(await cases(resAttr))) return;
-
-      const attData = await resAttr.json();
-      const attributesFound = Array.isArray(attData) ? attData : [attData];
-      if (attributesFound.length === 0) {
-        showTemporaryAlert('alert', 'No attributes found by that name');
-        return;
-      }
-
-      // Take the first attribute and fetch its tag by id
-      const firstAttr = attributesFound[0];
-      const tagIdFromAttr = Number(firstAttr.tag);
-      if (Number.isNaN(tagIdFromAttr)) {
-        showTemporaryAlert('alert', 'Invalid attribute->tag association');
-        return;
-      }
-
-      const resTagById = await fetch(`/tags/idTag/${encodeURIComponent(tagIdFromAttr)}`);
-      if (!(await cases(resTagById))) return;
-
-      const tagById = await resTagById.json();
-      const tagsArray = Array.isArray(tagById) ? tagById : [tagById];
-
-      const table = document.querySelector(".tagTable");
-      const header = table.querySelector("tr");
-      table.innerHTML = '';
-      if (header) table.appendChild(header);
-
-      tagsArray.forEach(t => {
-        const row = document.createElement("tr");
-        const dropdownRow = document.createElement("tr");
-        dropdownRow.classList.add('dropdown-row');
-        dropdownRow.style.display = 'none';
-
-        const tagAttrs = attributesFound.filter(att => Number(att.tag) === Number(t.id));
-
-        const filled = generateTable(t, tagAttrs, row, dropdownRow);
-        table.appendChild(filled.row);
-        table.appendChild(filled.dropdownRow);
-      });
-
-      dropdown(table);
-      showTemporaryAlert('success', 'Tag(s) and attribute(s) found');
-
+      
     } catch (err) {
       console.error('Error fetching tag:', err);
       showTemporaryAlert('alert', 'An unexpected error occurred');

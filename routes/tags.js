@@ -105,7 +105,7 @@ router.get('/tagName/:name', isAuthenticated, (req, res) => {
 
   const sql = `SELECT * FROM tags WHERE tagName = ?`;
 
-  db.all(sql, [tagName], (err, rows) => {
+  db.all(sql, [tagName.toLowerCase()], (err, rows) => {
     if (err) {
       console.error('Database error:', err.message);
       return res.status(500).json({ error: 'Internal server error' });
