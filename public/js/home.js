@@ -3,8 +3,8 @@ import { generateTable } from './generateTable.js';
 import { dropdown } from './dropdownAtt.js';
 
 export async function init() {
+  
   console.log('🏠 Home script executed');
-
   // -------------------------------
   // Fetch helpers
   // -------------------------------
@@ -25,10 +25,10 @@ export async function init() {
     // Fetch data
     // -------------------------------
     const tags = await getTags();
-    console.log('✅ Tags loaded:', tags);
+    //console.log('✅ Tags loaded:', tags);
 
     const attributes = await getAttributes();
-    console.log('✅ Attributes loaded:', attributes);
+    //console.log('✅ Attributes loaded:', attributes);
 
     const table = document.querySelector(".tagTable");
     const header = table.querySelector("tr");

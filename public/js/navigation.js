@@ -53,6 +53,7 @@ function initNavigation() {
     if (e.target.matches('#btn-sign-up')) changePage('/signUp');
     if (e.target.matches('#btn-log-in')) changePage('/logIn');
     if(e.target.matches('#btn-go-profile')) changePage('/profile');
+    if(e.target.matches('#btn-edit-tags')) changePage('/edit');
   });
 }
 // -------------------------------
@@ -85,6 +86,7 @@ function executePageScript() {
     case '/':
     case '/home':
       import('/js/home.js').then(mod => mod.init && mod.init());
+      import('/js/edit.js').then(mod => mod.init && mod.init());
       import('/js/delate.js').then(mod => mod.init && mod.init());
       break;
     case '/create':
@@ -98,6 +100,9 @@ function executePageScript() {
       break;
     case '/profile':
       import('/js/profile.js').then(mod => mod.init && mod.init());
+      break;
+    case '/edit':
+      import('/js/edit.js').then(mod => mod.init && mod.init());
       break;
   }
 }

@@ -11,7 +11,7 @@ export async function init() {
 
   form.addEventListener('submit', async (event) => {
 
-    // Prevent page reload
+     // Prevent page reload
     event.preventDefault();
 
     // -------------------------------

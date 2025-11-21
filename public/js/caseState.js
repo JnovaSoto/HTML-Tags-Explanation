@@ -1,17 +1,19 @@
 import {showTemporaryAlert} from './alerts.js';
-export async function cases(res) {
+export async function cases(res, suppressAlert = false) {
     if (!res.ok) {
-        switch (res.status) {
-            case 403:
-                showTemporaryAlert('alert', 'You do not have permission');
-                break;
-            case 404:
-                showTemporaryAlert('alert', 'No data found');
-                break;
-            default:
-                showTemporaryAlert('alert', 'Failed to fetch');
+        if (!suppressAlert) { 
+            switch (res.status) {
+                case 403:
+                    showTemporaryAlert('alert', 'You do not have permission');
+                    break;
+                case 404:
+                    showTemporaryAlert('alert', 'No data found');
+                    break;
+                default:
+                    showTemporaryAlert('alert', 'Failed to fetch');
+            }
         }
         return false;
     }
-    return true; 
+    return true;
 }

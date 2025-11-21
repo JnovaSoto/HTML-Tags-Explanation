@@ -1,4 +1,5 @@
 import { showTemporaryAlert } from './alerts.js';
+import { cases } from './caseState.js';
 
 export async function init() {
 
@@ -20,28 +21,30 @@ export async function init() {
     // Confirm deletion
     if (!confirm('Are you sure you want to delete this tag?')) return;
 
+   try {
+     
+    const resSession = await fetch('/users/me');
+      const sessionData = await resSession.json();
+      if (!sessionData.loggedIn) {
+        showTemporaryAlert('alert', 'You must log in to delete a tag');
+        return;
+      }
+
     const res = await fetch(`/tags/${id}`, { method: 'DELETE' });
 
-    if (res.ok) {
+    if (cases(res)) {
       // Remove the row from the table
       const row = deleteBtn.closest('tr');
       if (row) row.remove();
 
       showTemporaryAlert('success', 'Tag deleted successfully');
       console.log(`Tag ${id} deleted successfully.`);
-    } else {
-
-      const errData = await res.json();
-
-      if (res.status === 401) {
-        showTemporaryAlert('alert', 'You do not have permission to delete this tag');
-      } else if (res.status === 404) {
-        showTemporaryAlert('alert', 'Tag not found');
-      } else {
-        showTemporaryAlert('alert', errData.error || 'Failed to delete tag');
-      }
-
-      console.error('Failed to delete tag:', errData);
-    }
+    } 
+    
+   } catch (error) {
+    
+    console.error('Fetch failed:', error);
+    showTemporaryAlert('alert', "Something went wrong");
+   }
   });
 }

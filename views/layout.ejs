@@ -23,6 +23,7 @@
     <script type="module" src="/js/navigation.js"></script>
     <script type="module" src="/js/create.js"></script>
     <script type="module" src="/js/getTag.js"></script>
+    <script type="module" src="/js/edit.js"></script>
 </head>
 <body>
     <!-- Content Injection-->
@@ -45,6 +46,14 @@
     </div>
     <div class="alert alert-danger slide-alert" style="display: none;" role="alert" id="alert">
       The request had a problem
+    </div>
+
+    <!-- Error -->
+    <div id="error" style="display: none;">
+      <div class="content-error">
+        <h2>No tag founded</h2>
+        <img src="https://svgsilh.com/svg_v2/310891.svg" alt="">
+      </div>
     </div>
 </body>
 </html>

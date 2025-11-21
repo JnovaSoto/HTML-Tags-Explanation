@@ -42,6 +42,18 @@ footer {
   font-size: 0.9rem;      
   padding: 0 0.5rem;    
 }
+#error{
+  margin: auto;
+  text-align: center;
+  align-content: center;
+}
+#error img{
+  width: 5em;
+}
+#error .content-error{
+  margin-top: 1em;
+  padding: 1em;
+}
 #btn-sign-up{
   cursor: pointer;
 }

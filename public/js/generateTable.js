@@ -14,7 +14,12 @@ export function generateTable(tag,attributes,row,dropdownRow){
         </button>
         </td>
         <td>
-        <button class="delete-btn delete" id="btn-delete-tags" data-id="${tag.id || ''}">
+        <button class="edit-btn edit" id="btn-edit-tags" data-id="${tag.id}">
+            <span class="material-symbols-outlined icon_edit">edit</span>
+        </button>
+        </td>
+        <td>
+        <button class="delete-btn delete" id="btn-delete-tags" data-id="${tag.id}">
             <span class="material-symbols-outlined icon_delete">delete</span>
         </button>
         </td>
@@ -30,9 +35,9 @@ export function generateTable(tag,attributes,row,dropdownRow){
         html += `
           <tr>
             <td>Attribute</td>
-            <td>${att.attribute}</td>
+            <td>${escapeHTML(att.attribute)}</td>
             <td>Information</td>
-            <td>${att.info}</td>
+            <td>${escapeHTML(att.info)}</td>
           </tr>
         `;
 

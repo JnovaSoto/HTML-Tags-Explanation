@@ -57,6 +57,11 @@ app.get('/signUp', (req, res) => {
 app.get('/logIn', (req, res) => {
   res.render('logIn', { layout: 'layout', title: 'LogIn' });
 });
+//Edit
+app.get('/edit', (req, res) => {
+  res.render('edit', { layout: 'layout', title: 'Edit' });
+});
+
 
 
 

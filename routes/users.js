@@ -43,6 +43,8 @@ router.post('/user', async (req, res) => {
 router.post('/login', (req, res) => {
   const { login, password } = req.body;
 
+  console.log("Iniciando sesion")
+
   if (!login || !password) return res.status(400).json({ error: 'All the inputs have to be fulled' });
 
   // Find user by username OR email

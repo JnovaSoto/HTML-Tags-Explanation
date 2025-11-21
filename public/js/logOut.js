@@ -1,3 +1,4 @@
+
 export function init(logOutButton){
 
     console.log("🚪 Log Out Script Executed")
@@ -5,9 +6,6 @@ export function init(logOutButton){
     if (!logOutButton) return;
 
     logOutButton.addEventListener('click', async event => {
-       
-        // Prevent page reload
-        event.preventDefault();
 
         await fetch('/users/logout', { method: 'POST' });
         

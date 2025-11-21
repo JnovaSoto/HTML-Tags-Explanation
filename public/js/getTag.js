@@ -11,6 +11,10 @@ export async function init() {
 
   formGetTag.addEventListener('submit', async (event) => {
 
+    const error = document.getElementById('error')
+
+    error.style.display = 'none';
+
     // Prevent default form submission
     event.preventDefault();
 
@@ -24,11 +28,10 @@ export async function init() {
     const tagName = input.value.trim();
 
     try {
-      // -------------------------------
-      // Verify session
-      // -------------------------------
+      
       const resSession = await fetch('/users/me');
       const sessionData = await resSession.json();
+      
       if (!sessionData.loggedIn) {
         showTemporaryAlert('alert', 'You must log in to search a tag');
         return;
@@ -37,17 +40,16 @@ export async function init() {
       const table = document.querySelector('.tagTable');
       // Clear previous results
       table.innerHTML = `
-        <tr>
-          <th>Tag</th>
-          <th>Usability</th>
-          <th>Actions</th>
-          <th>Delete</th>
-        </tr>
+        <th><h3>Tags</h3></th>
+        <th><h3>Usability</h3></th>
+        <th><h3>Atributes</h3></th>
+        <th><h3>Edit</h3></th>
+        <th><h3>Delete </h3></th>
       `;
 
       // Fetch tag(s) by name
       const resTag = await fetch(`/tags/tagName/${encodeURIComponent(tagName)}`);
-      if (await cases(resTag)) {
+      if (await cases(resTag,true)) {
 
         // Load tags and attributes
         const rawTag = await resTag.json();
@@ -79,57 +81,48 @@ export async function init() {
         return;
       }else {
 
-        showTemporaryAlert('alert', 'No tags found with that name');
-
          // If not found by name, search by attribute name (fallback)
         const resAttr = await fetch(`/tags/attribute/attributeName/${encodeURIComponent(tagName)}`);
-        if (!(await cases(resAttr))) return;
+        if (!(await cases(resAttr,true))) {
+              document.querySelector('.tagTable').innerHTML = "";
+              error.style.display = 'block';
+              return;
+          }
 
           const attData = await resAttr.json();
           const attributesFound = Array.isArray(attData) ? attData : [attData];
 
-          if (attributesFound.length === 0) {
-            showTemporaryAlert('alert', 'No attributes found by that name');
-            return;
-          }
+          const tagIds = attData.map(attr => attr.tag);
 
-          // Take the first attribute and fetch its tag by id
-          const firstAttr = attributesFound[0];
-          const tagIdFromAttr = Number(firstAttr.tag);
-
-          if (Number.isNaN(tagIdFromAttr)) {
-            showTemporaryAlert('alert', 'Invalid attribute->tag association');
-            return;
-          }
-
-          const resTagById = await fetch(`/tags/idTag/${encodeURIComponent(tagIdFromAttr)}`);
+          const resTagById = await fetch(`/tags/idTag/${tagIds.join(',')}`);
+          const tags = await resTagById.json();
           
           if (!(await cases(resTagById))) return;
 
-          const tagById = await resTagById.json();
-          const tagsArray = Array.isArray(tagById) ? tagById : [tagById];
+            const tagsArray = Array.isArray(tags) ? tags : [tags];
 
-          const table = document.querySelector(".tagTable");
-          const header = table.querySelector("tr");
-          table.innerHTML = '';
+            const table = document.querySelector(".tagTable");
+            const header = table.querySelector("tr");
+            table.innerHTML = '';
 
-          if (header) table.appendChild(header);
+            if (header) table.appendChild(header);
 
-            tagsArray.forEach(t => {
-              const row = document.createElement("tr");
-              const dropdownRow = document.createElement("tr");
-              dropdownRow.classList.add('dropdown-row');
-              dropdownRow.style.display = 'none';
+              tagsArray.forEach(t => {
+                const row = document.createElement("tr");
+                const dropdownRow = document.createElement("tr");
+                dropdownRow.classList.add('dropdown-row');
+                dropdownRow.style.display = 'none';
 
-              const tagAttrs = attributesFound.filter(att => Number(att.tag) === Number(t.id));
+                const tagAttrs = attributesFound.filter(att => Number(att.tag) === Number(t.id));
 
-              const filled = generateTable(t, tagAttrs, row, dropdownRow);
-              table.appendChild(filled.row);
-              table.appendChild(filled.dropdownRow);
-          });
+                const filled = generateTable(t, tagAttrs, row, dropdownRow);
+                table.appendChild(filled.row);
+                table.appendChild(filled.dropdownRow);
+            });
 
         dropdown(table);
         showTemporaryAlert('success', 'Tag(s) and attribute(s) found');
+        return;
       }
       
     } catch (err) {

@@ -78,19 +78,26 @@ router.post('/attributes/create',isAuthenticated, (req, res) => {
 });
 
 //Get tag by id
-router.get('/idTag/:id', isAuthenticated, (req,res) =>{
-  const tagId = req.params.id;
+router.get('/idTag/:ids', isAuthenticated, (req,res) =>{
+  
+  const idsParam = req.params.ids;
+  if (!idsParam) {
+    return res.status(400).json({ error: "No se recibieron ids." });
+  }
+  const ids = idsParam.split(',').map(id => Number(id.trim()));
+  const placeholders = ids.map(() => '?').join(',');
+  const sqlTag = `SELECT * FROM Tags WHERE id IN (${placeholders})`;
+  console.log("Buscando tags con los ids = "+ idsParam)
+  console.log("Buscando tags con los ids = "+ ids)
 
-    const sqlTag = `SELECT * FROM tags WHERE id = ?`;
-
-    db.all(sqlTag, [tagId], (err, tagRows) => {
+    db.all(sqlTag, ids, (err, tagRows) => {
       if (err) {
         console.error('Database error:', err.message);
         return res.status(500).json({ error: 'Internal server error' });
       }
 
       if (tagRows.length === 0) {
-        return res.status(404).json({ error: 'Tag not found' });
+        return res.status(404).json({ error: 'Tag not found' , tagRows});
       }
         res.json(tagRows);
     });
@@ -120,14 +127,14 @@ router.get('/tagName/:name', isAuthenticated, (req, res) => {
 });
 
 // Get attribute by tag id
-router.get('/attribute/:id', isAuthenticated, (req, res) => {
+router.get('/attributes/idAttribute/:id', isAuthenticated, (req, res) => {
   const tagId = req.params.id;
 
   console.log("Getting attributes for tag id", tagId);
 
   const sql = `SELECT * FROM attributes WHERE tag = ?`;
 
-  db.all(sql, [tagId], (err, rows) => {
+  db.all(sql, tagId, (err, rows) => {
     if (err) {
       console.error('Database error:', err.message);
       return res.status(500).json({ error: 'Internal server error' });

@@ -58,6 +58,9 @@ export function init() {
     const tagBody = { tagName, usability };
 
     try {
+
+        if(!isLogged()) return;
+
       // -------------------------------
       // Create the tag first
       // -------------------------------
